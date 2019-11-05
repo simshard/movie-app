@@ -1,0 +1,119 @@
+<template>
+  <v-container v-if="loading">
+    <div class="text-xs-center">
+      <v-progress-circular
+        indeterminate
+        :size="150"
+        :width="8"
+        color="green"
+      />
+    </div>
+  </v-container>
+
+  <v-container v-else-if="noData">
+    <div class="text-xs-center">
+      <h2>No Movie in API with {{ this.name }}</h2>
+    </div>
+  </v-container>
+
+  <v-container
+    v-else
+    grid-list-xl
+  >
+    <v-layout wrap>
+      <v-flex
+        v-for="(item, index) in movieResponse"
+        :key="index"
+        xs4
+        mb-2
+      >
+        <v-card>
+          <v-img
+            :src="item.Poster"
+            aspect-ratio="1"
+          />
+
+          <v-card-title primary-title>
+            <div>
+              <h2>{{ item.Title }}</h2>
+              <div>Year: {{ item.Year }}</div>
+              <div>Type: {{ item.Type }}</div>
+              <div>IMDB-id: {{ item.imdbID }}</div>
+            </div>
+          </v-card-title>
+
+          <v-card-actions>
+            <v-btn
+              rounded
+              color="green"
+              @click="singleMovie(item.imdbID)"
+            >
+              View
+            </v-btn>
+            <v-btn
+              rounded
+              color="green"
+            >
+              Visit site
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-flex>
+    </v-layout>
+  </v-container>
+</template>
+
+<script>
+import axios from 'axios'
+export default {
+  props:{
+     name:{
+        default:'',
+        type:String,
+     } 
+  },
+  data () {
+    return {
+      movieResponse: [],
+      loading: true,
+      noData: false
+    }
+  },
+    watch: {
+    name (value) {
+      this.fetchResult(value)
+    }
+  },
+ mounted () {
+    this.fetchResult(this.name)
+  },
+  methods: {
+    singleMovie (id) {
+      this.$router.push('/movie/' + id)
+    },
+     fetchResult (value) {
+      const url = 'http://www.omdbapi.com/?apikey=b76b385c&Content-Type=application/json' + '&s=' + value
+      axios
+        .get(url)
+        .then(response => {
+          if (response.data.Response === 'True') {
+            this.movieResponse = response.data.Search
+            this.loading = false
+            this.noData = false
+          } else {
+            this.noData = true
+            this.loading = false
+          }
+        })
+        .catch(error => {
+          console.log(error)
+        })
+    }
+  }
+}
+</script>
+
+<style  scoped>
+  .v-progress-circular
+  {  margin: 1rem;}
+</style>

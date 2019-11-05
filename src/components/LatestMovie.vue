@@ -1,0 +1,85 @@
+/* eslint-disable */ 
+<template>
+  <v-container v-if="loading">
+    <div class="text-xs-center">
+      <v-progress-circular
+        indeterminate
+        :size="150"
+        :width="8"
+        color="green"
+      />
+    </div>
+  </v-container>
+
+  <v-container
+    v-else
+    grid-list-xl
+  >
+    <v-layout wrap>
+      <v-flex
+        v-for="(item, index) in wholeResponse" 
+        :key="index"
+        xs4
+        mb-2
+      >
+        <v-card>
+          <v-img
+            :src="item.Poster"
+            aspect-ratio="1"
+          />
+          <v-card-title primary-title>
+            <div>
+              <h2>{{ item.Title }}</h2>
+              <div>Year: {{ item.Year }}</div>
+              <div>Type: {{ item.Type }}</div>
+              <div>IMDB-id: {{ item.imdbID }}</div>
+            </div>
+          </v-card-title>
+
+          <v-card-actions class="justify-center">
+            <v-btn 
+              text
+              color="green"
+              @click="singleMovie(item.imdbID)"
+            >
+              View
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-flex>
+    </v-layout>
+  </v-container> 
+</template>
+
+<script>
+import axios from 'axios'
+export default {
+  data () {
+    return {
+      wholeResponse: [],
+      loading: true
+    }
+  },
+  mounted () {
+  axios
+    .get('http://www.omdbapi.com/?apikey=5515fcb8&page=1&type=movie&Content-Type=application/json&s=they%20live')
+    .then(response => {
+      this.wholeResponse = response.data.Search
+      this.loading = false
+    })
+    .catch(error => {
+      console.log(error)
+    })
+  },
+  methods: {
+    singleMovie (id) {
+      this.$router.push('/movie/' + id)
+    }
+  }
+}
+</script>
+
+<style  scoped>
+  .v-progress-circular
+  {  margin: 1rem;}
+</style>
